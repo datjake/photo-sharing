@@ -1,26 +1,48 @@
-import React from "react";
-import {Typography} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Typography } from "@mui/material";
+import { useParams } from "react-router-dom";
 
+import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
-import {useParams} from "react-router-dom";
-import models from "../../modelData/models";
 
 /**
- * Define UserDetail, a React component of Project 4.
+ * UserDetail - hiển thị thông tin chi tiết của user lấy từ backend.
  */
 function UserDetail() {
-    const user = useParams();
-    const userModel = models.userModel(user.userId);
-    return (
-        <>
-          <p>ID: { userModel._id }</p>
-          <p>First Name: { userModel.first_name }</p>
-          <p>Last Name: { userModel.last_name }</p>
-          <p>Location: { userModel.location }</p>
-          <p>Description: { userModel.description }</p>
-          <p>Occupation: { userModel.occupation }</p>
-        </>
-    );
+  const { userId } = useParams();
+  const [user, setUser] = useState(null); 
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchModel(`https://f6n7zh-8080.csb.app/api/user/${userId}`)
+      .then((data) => {
+        setUser(data);
+        setError(null);
+      })
+      .catch(() => {
+        setUser(null);
+        setError("User Not Found");
+      });
+  }, [userId]);
+
+  if (error) {
+    return <Typography variant="h6">{error}</Typography>;
+  }
+
+  if (!user) {
+    return <Typography variant="body1">Loading...</Typography>;
+  }
+
+  return (
+    <>
+      <p>ID: {user._id}</p>
+      <p>First Name: {user.first_name}</p>
+      <p>Last Name: {user.last_name}</p>
+      <p>Location: {user.location}</p>
+      <p>Description: {user.description}</p>
+      <p>Occupation: {user.occupation}</p>
+    </>
+  );
 }
 
 export default UserDetail;

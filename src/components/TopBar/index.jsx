@@ -1,42 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { useMatch } from "react-router-dom";
-import models from "../../modelData/models"; 
+
+import fetchModel from "../../lib/fetchModelData";
 
 import "./styles.css";
 
 /**
- * Define TopBar, a React component of Project 4.
+ * TopBar - Hiển thị thông tin trên thanh tiêu đề.
  */
-function TopBar () {
-    const userMatch   = useMatch("/users/:userId");
-    const photosMatch = useMatch("/photos/:userId");
-    let rightText = "";
-    if(userMatch?.params?.userId){
-        const user = models.userModel(userMatch.params.userId);
-        rightText = user ? `${user.first_name} ${user.last_name}` : "User Not Found";
-    }
-    else if(photosMatch?.params?.userId){
-        const user = models.userModel(photosMatch.params.userId);
-        rightText = user ? `Photo of ${user.first_name} ${user.last_name}` : "User Not Found";
-    }
-    return (
-      <AppBar className="topbar-appBar" position="absolute">
-        <Toolbar>
-          <Typography variant="h5" color="inherit">
-            Duong Quang Hao
+function TopBar() {
+  const userMatch = useMatch("/users/:userId");
+  const photosMatch = useMatch("/photos/:userId");
+
+  const [user, setUser] = useState(null);
+  const userId =
+    userMatch?.params?.userId || photosMatch?.params?.userId || null;
+
+  useEffect(() => {
+    if (!userId) return;
+
+    fetchModel(`https://f6n7zh-8080.csb.app/api/user/${userId}`)
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
+  }, [userId]);
+
+  let rightText = "";
+
+  if (userMatch?.params?.userId && user) {
+    rightText = `${user.first_name} ${user.last_name}`;
+  } else if (photosMatch?.params?.userId && user) {
+    rightText = `Photos of ${user.first_name} ${user.last_name}`;
+  } else if (userId && !user) {
+    rightText = "User Not Found";
+  }
+
+  return (
+    <AppBar className="topbar-appBar" position="absolute">
+      <Toolbar>
+        <Typography variant="h5" color="inherit">
+          Nguyen Cao Dat
+        </Typography>
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        {rightText && (
+          <Typography variant="h6" color="inherit">
+            {rightText}
           </Typography>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          {rightText && (
-            <Typography variant="h6" color="inherit">
-              {rightText}
-            </Typography>
-          )}
-        </Toolbar>
-      </AppBar>
-    );
+        )}
+      </Toolbar>
+    </AppBar>
+  );
 }
 
 export default TopBar;
