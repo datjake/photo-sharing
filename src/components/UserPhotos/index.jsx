@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import fetchModel from "../../fetchModelData"; // import hàm fetchModel
+import fetchModel from "../../lib/fetchModelData"; // import hàm fetchModel
 
 function UserPhotos() {
   const { userId } = useParams();
