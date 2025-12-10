@@ -1,37 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import fetchModel from "../../fetchModelData"; // import hàm fetchModel
-
-function UserPhotos() {
-  const { userId } = useParams();
-  const [userPhoto, setUserPhoto] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    // URL backend để lấy dữ liệu ảnh người dùng
-    const url = `https://f6n7zh-8080.csb.app/photos?userId=${userId}`;
-
-    fetchModel(url)
-      .then((data) => {
-        if (data && data.length > 0) {
-          setUserPhoto(data[0]); // lấy ảnh đầu tiên
-        } else {
-          setError("No photos found for this user");
-        }
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
-  }, [userId]);
-
-  if (error) return <p>{error}</p>;
-  if (!userPhoto) return <p>Loading...</p>;
-
-  return (
-    <div>
-      <img src={userPhoto.file_url} alt="user photo" />
-    </div>
-  );
+/**
+ * fetchModel - Fetch a model from the web server.
+ *
+ * @param {string} url  The URL to issue the GET request.
+ * @returns {Promise<object>} JSON data returned from backend
+ */
+function fetchModel(url) {
+  return fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch model data");
+      }
+      return response.json();
+    })
+    .catch((err) => {
+      console.error("fetchModel error:", err);
+      throw err;
+    });
 }
 
-export default UserPhotos;
+export default fetchModel;

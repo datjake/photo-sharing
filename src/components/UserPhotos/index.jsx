@@ -1,22 +1,37 @@
-import React from "react";
-import { Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import fetchModel from "../../fetchModelData"; // import hàm fetchModel
 
-import "./styles.css";
-import {useParams} from "react-router-dom";
-import models from "../../modelData/models";
-const ctx = require.context("../../images", false, /\.(png|jpe?g|gif|svg)$/);
+function UserPhotos() {
+  const { userId } = useParams();
+  const [userPhoto, setUserPhoto] = useState(null);
+  const [error, setError] = useState(null);
 
-/**
- * Define UserPhotos, a React component of Project 4.
- */
-function UserPhotos () {
-    const user = useParams();
-    const userPhoto = models.photoOfUserModel(user.userId)[0];
-    return (
-      <>
-        <img src={ctx(`./${userPhoto.file_name}`)} alt="user photo" />
-      </>
-    );
+  useEffect(() => {
+    // URL backend để lấy dữ liệu ảnh người dùng
+    const url = `https://f6n7zh-8080.csb.app/photos?userId=${userId}`;
+
+    fetchModel(url)
+      .then((data) => {
+        if (data && data.length > 0) {
+          setUserPhoto(data[0]); // lấy ảnh đầu tiên
+        } else {
+          setError("No photos found for this user");
+        }
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
+  }, [userId]);
+
+  if (error) return <p>{error}</p>;
+  if (!userPhoto) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <img src={userPhoto.file_url} alt="user photo" />
+    </div>
+  );
 }
 
 export default UserPhotos;
