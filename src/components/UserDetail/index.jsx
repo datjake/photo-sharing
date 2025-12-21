@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
@@ -10,11 +10,11 @@ import "./styles.css";
  */
 function UserDetail() {
   const { userId } = useParams();
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchModel(`https://f6n7zh-8080.csb.app/api/user/${userId}`)
+    fetchModel(`https://7kwtyg-8080.csb.app/api/user/${userId}`)
       .then((data) => {
         setUser(data);
         setError(null);
@@ -41,6 +41,7 @@ function UserDetail() {
       <p>Location: {user.location}</p>
       <p>Description: {user.description}</p>
       <p>Occupation: {user.occupation}</p>
+      <Link to={`/photos/${user._id}`}>Photos</Link>
     </>
   );
 }
