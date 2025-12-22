@@ -107,7 +107,7 @@ function UserPhotos() {
               >
                 <Typography variant="body2">
                   <Link
-                    to={`/users/${c.user_id}`}
+                    to={`/users/${c.user_id._id}`}
                     style={{ fontWeight: "bold", textDecoration: "none" }}
                   >
                     {c.user_id.first_name} {c.user_id.last_name}
