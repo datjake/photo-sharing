@@ -46,8 +46,11 @@ function UserDetail() {
         sx={{ mb: 2, display: "block", color: "white" }}
       >
         {" "}
-        <Link to={`/photos/${user._id}`} style={{ color: "white" }}>
-          {"Photos: "}
+        <Link
+          to={`/photos/${user._id}`}
+          style={{ color: "white", textDecoration: "none" }}
+        >
+          {"Photo post: "}
           {user.photoCount}{" "}
         </Link>{" "}
       </Button>
@@ -57,8 +60,11 @@ function UserDetail() {
         sx={{ mb: 2, display: "block", color: "white" }}
       >
         {" "}
-        <Link to={`/comments/${user._id}`} style={{ color: "white" }}>
-          {"So comment: "}
+        <Link
+          to={`/comments/${user._id}`}
+          style={{ color: "white", textDecoration: "none" }}
+        >
+          {"comment history: "}
           {user.commentCount}{" "}
         </Link>{" "}
       </Button>

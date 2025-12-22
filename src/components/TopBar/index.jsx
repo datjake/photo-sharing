@@ -11,10 +11,14 @@ function TopBar({ currentUser, onLogout }) {
 
   const userMatch = useMatch("/users/:userId");
   const photosMatch = useMatch("/photos/:userId");
+  const commentMatch = useMatch("/comments/:userId");
 
   const [user, setUser] = useState(null);
   const userId =
-    userMatch?.params?.userId || photosMatch?.params?.userId || null;
+    userMatch?.params?.userId ||
+    photosMatch?.params?.userId ||
+    commentMatch?.params?.userId ||
+    null;
 
   useEffect(() => {
     if (!userId) return;
@@ -31,6 +35,8 @@ function TopBar({ currentUser, onLogout }) {
     rightText = `${user.first_name} ${user.last_name}`;
   } else if (photosMatch?.params?.userId && user) {
     rightText = `Photos of ${user.first_name} ${user.last_name}`;
+  } else if (commentMatch?.params?.userId && user) {
+    rightText = `Comments of ${user.first_name} ${user.last_name}`;
   } else if (userId && !user) {
     rightText = "User Not Found";
   }
@@ -113,7 +119,7 @@ function TopBar({ currentUser, onLogout }) {
                 ============================================================ */}
             <Button
               variant="contained"
-              color="secondary"
+              color="success"
               component="label"
               sx={{ marginRight: 2 }}
             >
