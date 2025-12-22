@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography } from "@mui/material";
+import { Typography, Button } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
 
 import fetchModel from "../../lib/fetchModelData";
@@ -41,7 +41,27 @@ function UserDetail() {
       <p>Location: {user.location}</p>
       <p>Description: {user.description}</p>
       <p>Occupation: {user.occupation}</p>
-      <Link to={`/photos/${user._id}`}>Photos</Link>
+      <Button
+        variant="contained"
+        sx={{ mb: 2, display: "block", color: "white" }}
+      >
+        {" "}
+        <Link to={`/photos/${user._id}`} style={{ color: "white" }}>
+          {"Photos: "}
+          {user.photoCount}{" "}
+        </Link>{" "}
+      </Button>
+      <br />{" "}
+      <Button
+        variant="contained"
+        sx={{ mb: 2, display: "block", color: "white" }}
+      >
+        {" "}
+        <Link to={`/comments/${user._id}`} style={{ color: "white" }}>
+          {"So comment: "}
+          {user.commentCount}{" "}
+        </Link>{" "}
+      </Button>
     </>
   );
 }

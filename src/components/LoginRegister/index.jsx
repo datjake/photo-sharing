@@ -1,218 +1,212 @@
 import React, { useState } from "react";
-
-import { Typography, TextField, Button } from "@mui/material";
-
+import { Typography, TextField, Button, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
-
 import { useNavigate } from "react-router-dom";
 
 function LoginRegister({ onLoginSuccess }) {
   const navigate = useNavigate();
 
   /* ===== LOGIN FORM ===== */
-
-  const {
-    register: registerLogin,
-
-    handleSubmit: handleLoginSubmit,
-
-    formState: { errors: loginErrors },
-  } = useForm();
+  const { register: registerLogin, handleSubmit: handleLoginSubmit } =
+    useForm();
 
   /* ===== REGISTER FORM ===== */
-
   const {
     register: registerRegister,
-
     handleSubmit: handleRegisterSubmit,
-
     reset,
-
-    watch,
-
-    formState: { errors: registerErrors },
   } = useForm();
 
-  const [message, setMessage] = useState("");
-
-  const [messageType, setMessageType] = useState("error");
+  const [mode, setMode] = useState("login"); // login | register
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   /* ===== LOGIN ===== */
-
   const onLogin = async (data) => {
+    setError("");
+    setSuccess("");
+
     try {
       const res = await fetch("https://7kwtyg-8080.csb.app/api/admin/login", {
         method: "POST",
-
         credentials: "include",
-
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) {
-        const err = await res.text();
-
-        throw new Error(err);
-      }
+      if (!res.ok) throw new Error(await res.text());
 
       const user = await res.json();
-
       onLoginSuccess(user);
-
       navigate(`/users/${user._id}`);
     } catch (err) {
-      setMessageType("error");
-
-      setMessage(err.message);
+      setError(err.message);
     }
   };
 
   /* ===== REGISTER ===== */
-
   const onRegister = async (data) => {
+    setError("");
+    setSuccess("");
+
     if (data.password !== data.confirm_password) {
-      setMessageType("error");
-
-      setMessage("Passwords do not match");
-
+      setError("Passwords do not match");
       return;
     }
 
     try {
       const res = await fetch("https://7kwtyg-8080.csb.app/api/user/register", {
         method: "POST",
-
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) {
-        const err = await res.text();
+      if (!res.ok) throw new Error(await res.text());
 
-        throw new Error(err);
-      }
-
-      setMessageType("success");
-
-      setMessage("Registration successful!");
-
+      setSuccess("Registration successful! Please login.");
       reset();
+      setMode("login");
     } catch (err) {
-      setMessageType("error");
-
-      setMessage(err.message);
+      setError(err.message);
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Typography variant="h5">Please Login</Typography>
+    <Box sx={{ padding: "20px" }}>
+      {/* ================= LOGIN ================= */}
+      {mode === "login" && (
+        <>
+          <Typography variant="h5">Please Login</Typography>
 
-      {/* ===== LOGIN FORM ===== */}
+          <form onSubmit={handleLoginSubmit(onLogin)}>
+            <TextField
+              label="Login Name"
+              fullWidth
+              margin="normal"
+              {...registerLogin("login_name", { required: true })}
+            />
 
-      <form onSubmit={handleLoginSubmit(onLogin)}>
-        <TextField
-          label="Login Name"
-          fullWidth
-          margin="normal"
-          {...registerLogin("login_name", { required: true })}
-        />
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              margin="normal"
+              {...registerLogin("password", { required: true })}
+            />
 
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          {...registerLogin("password", { required: true })}
-        />
+            <Button type="submit" variant="contained">
+              Login
+            </Button>
+          </form>
 
-        <Button type="submit" variant="contained">
-          Login
-        </Button>
-      </form>
+          <Box sx={{ marginTop: 2 }}>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setError("");
+                setSuccess("");
+                setMode("register");
+              }}
+            >
+              Register Me
+            </Button>
+          </Box>
+        </>
+      )}
 
-      <hr />
+      {/* ================= REGISTER ================= */}
+      {mode === "register" && (
+        <>
+          <Typography variant="h5">Register New User</Typography>
 
-      <Typography variant="h5">Register New User</Typography>
+          <form onSubmit={handleRegisterSubmit(onRegister)}>
+            <TextField
+              label="Login Name"
+              fullWidth
+              margin="normal"
+              {...registerRegister("login_name", { required: true })}
+            />
 
-      {/* ===== REGISTER FORM ===== */}
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              margin="normal"
+              {...registerRegister("password", { required: true })}
+            />
 
-      <form onSubmit={handleRegisterSubmit(onRegister)}>
-        <TextField
-          label="Login Name"
-          fullWidth
-          margin="normal"
-          {...registerRegister("login_name", { required: true })}
-        />
+            <TextField
+              label="Confirm Password"
+              type="password"
+              fullWidth
+              margin="normal"
+              {...registerRegister("confirm_password", { required: true })}
+            />
 
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          {...registerRegister("password", { required: true })}
-        />
+            <TextField
+              label="First Name"
+              fullWidth
+              margin="normal"
+              {...registerRegister("first_name", { required: true })}
+            />
 
-        <TextField
-          label="Confirm Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          {...registerRegister("confirm_password", { required: true })}
-        />
+            <TextField
+              label="Last Name"
+              fullWidth
+              margin="normal"
+              {...registerRegister("last_name", { required: true })}
+            />
 
-        <TextField
-          label="First Name"
-          fullWidth
-          margin="normal"
-          {...registerRegister("first_name", { required: true })}
-        />
+            <TextField
+              label="Location"
+              fullWidth
+              margin="normal"
+              {...registerRegister("location")}
+            />
 
-        <TextField
-          label="Last Name"
-          fullWidth
-          margin="normal"
-          {...registerRegister("last_name", { required: true })}
-        />
+            <TextField
+              label="Description"
+              fullWidth
+              margin="normal"
+              {...registerRegister("description")}
+            />
 
-        <TextField
-          label="Location"
-          fullWidth
-          margin="normal"
-          {...registerRegister("location")}
-        />
+            <TextField
+              label="Occupation"
+              fullWidth
+              margin="normal"
+              {...registerRegister("occupation")}
+            />
 
-        <TextField
-          label="Description"
-          fullWidth
-          margin="normal"
-          {...registerRegister("description")}
-        />
+            <Button type="submit" variant="contained" color="success">
+              Register
+            </Button>
 
-        <TextField
-          label="Occupation"
-          fullWidth
-          margin="normal"
-          {...registerRegister("occupation")}
-        />
+            <Button
+              sx={{ marginLeft: 2 }}
+              onClick={() => {
+                setError("");
+                setSuccess("");
+                setMode("login");
+              }}
+            >
+              Cancel
+            </Button>
+          </form>
+        </>
+      )}
 
-        <Button type="submit" variant="contained" color="success">
-          Register Me
-        </Button>
-      </form>
-
-      {message && (
-        <Typography
-          sx={{ marginTop: 2 }}
-          color={messageType === "error" ? "error" : "green"}
-        >
-          {message}
+      {/* ================= MESSAGE ================= */}
+      {error && (
+        <Typography color="error" sx={{ marginTop: 2 }}>
+          {error}
         </Typography>
       )}
-    </div>
+
+      {success && (
+        <Typography sx={{ marginTop: 2, color: "green" }}>{success}</Typography>
+      )}
+    </Box>
   );
 }
 

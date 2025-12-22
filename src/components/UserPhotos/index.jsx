@@ -73,23 +73,6 @@ function UserPhotos() {
     return <Typography>Loading or No photos found...</Typography>;
   }
 
-  // Xóa comment
-  const handleDeleteComment = async (photoId, commentId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
-    try {
-      await fetch(
-        `https://7kwtyg-8080.csb.app/api/photo/comments/${photoId}/${commentId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-      loadPhotos();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <div className="user-photos-container">
       {photos.map((photo) => (
@@ -114,7 +97,7 @@ function UserPhotos() {
               NEW: Hiển thị danh sách bình luận hiện có
               ============================================================ */}
           <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-            Comments:
+            Comments: ({photo.comments.length})
           </Typography>
           {photo.comments && photo.comments.length > 0 ? (
             photo.comments.map((c) => (

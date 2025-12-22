@@ -14,6 +14,7 @@ import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginRegister from "./components/LoginRegister";
+import UserCommentLink from "./components/UserCommentLink";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -69,6 +70,12 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/comments/:userId" element={
+                  <ProtectedRoute currentUser={currentUser}>
+                    <UserCommentLink />
+                  </ProtectedRoute>
+                } />
+
 
               <Route
                 path="*"
