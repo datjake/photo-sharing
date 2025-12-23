@@ -28,17 +28,12 @@ const App = () => {
             onLogout={() => setCurrentUser(null)}
           />
         </Grid>
-
         <div className="main-topbar-buffer" />
-
-        {/* SIDEBAR */}
         <Grid item sm={3}>
           <Paper className="main-grid-item">
             {currentUser && <UserList />}
           </Paper>
         </Grid>
-
-        {/* MAIN */}
         <Grid item sm={9}>
           <Paper className="main-grid-item">
             <Routes>
@@ -52,7 +47,6 @@ const App = () => {
                   )
                 }
               />
-
               <Route
                 path="/users/:userId"
                 element={
@@ -61,22 +55,24 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/photos/:userId"
                 element={
                   <ProtectedRoute currentUser={currentUser}>
-                    <UserPhotos />
+                    {/* SỬA: Truyền currentUser vào đây */}
+                    <UserPhotos currentUser={currentUser} />
                   </ProtectedRoute>
                 }
               />
-              <Route path="/comments/:userId" element={
+              <Route
+                path="/comments/:userId"
+                element={
                   <ProtectedRoute currentUser={currentUser}>
-                    <UserCommentLink />
+                    {/* SỬA: Truyền currentUser vào đây */}
+                    <UserCommentLink currentUser={currentUser} />
                   </ProtectedRoute>
-                } />
-
-
+                }
+              />
               <Route
                 path="*"
                 element={

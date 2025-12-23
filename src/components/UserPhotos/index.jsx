@@ -2,141 +2,143 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Typography, TextField, Button, Box, Divider } from "@mui/material";
 import fetchModel from "../../lib/fetchModelData";
-
 import "./styles.css";
 
-//const ctx = require.context("../../images", false, /\.(png|jpe?g|gif)$/);
-
-function UserPhotos() {
+function UserPhotos({ currentUser }) {
   const { userId } = useParams();
   const [photos, setPhotos] = useState([]);
-  const [error, setError] = useState(null);
-
-  /* ============================================================
-     NEW: Problem 2 - State để quản lý nội dung comment cho từng ảnh
-     Sử dụng object { [photoId]: "nội dung" } để tránh bị gõ trùng các ô
-     ============================================================ */
   const [commentText, setCommentText] = useState({});
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
-  // Hàm tải dữ liệu ảnh (tách riêng để gọi lại khi cần update UI)
   const loadPhotos = () => {
-    const url = `https://7kwtyg-8080.csb.app/api/photo/photosOfUser/${userId}`;
-    fetchModel(url)
-      .then((data) => setPhotos(data))
-      .catch((err) => setError(err.message));
+    fetchModel(
+      `https://7kwtyg-8080.csb.app/api/photo/photosOfUser/${userId}`
+    ).then((data) => setPhotos(data));
   };
 
   useEffect(() => {
     loadPhotos();
   }, [userId]);
 
-  /* ============================================================
-     NEW: Problem 2 - Hàm xử lý gửi bình luận mới
-     ============================================================ */
   const handleAddComment = async (photoId) => {
     const text = commentText[photoId];
-    if (!text || !text.trim()) {
-      alert("Please enter a comment");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://7kwtyg-8080.csb.app/api/photo/commentsOfPhoto/${photoId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ comment: text }),
-          credentials: "include", // Quan trọng để gửi session cookie
-        }
-      );
-
-      if (response.ok) {
-        // Xóa trắng ô nhập sau khi gửi thành công
-        setCommentText({ ...commentText, [photoId]: "" });
-        // Tải lại dữ liệu ảnh để hiển thị comment mới ngay lập tức (Problem 2)
-        loadPhotos();
-      } else {
-        const errText = await response.text();
-        alert("Failed to add comment: " + errText);
+    if (!text?.trim()) return alert("Enter a comment");
+    const res = await fetch(
+      `https://7kwtyg-8080.csb.app/api/photo/commentsOfPhoto/${photoId}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: text }),
+        credentials: "include",
       }
-    } catch (err) {
-      console.error("Error adding comment:", err);
+    );
+    if (res.ok) {
+      setCommentText({ ...commentText, [photoId]: "" });
+      loadPhotos();
     }
   };
 
-  if (error) {
-    return <Typography color="error">{error}</Typography>;
-  }
+  const handleDelete = async (commentId) => {
+    if (!window.confirm("Delete?")) return;
+    const res = await fetch(
+      `https://7kwtyg-8080.csb.app/api/photo/comment/${commentId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+    if (res.ok) loadPhotos();
+  };
 
-  if (!photos.length) {
-    return <Typography>Loading or No photos found...</Typography>;
-  }
+  const handleUpdate = async (commentId) => {
+    const res = await fetch(
+      `https://7kwtyg-8080.csb.app/api/photo/comment/${commentId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ comment: editText }),
+      }
+    );
+    if (res.ok) {
+      setEditingId(null);
+      loadPhotos();
+    }
+  };
 
   return (
-    <div className="user-photos-container">
+    <Box className="user-photos-container">
       {photos.map((photo) => (
-        <Box
-          key={photo._id}
-          sx={{
-            marginBottom: "40px",
-            padding: "10px",
-            border: "1px solid #eee",
-          }}
-        >
-          {/* HIỂN THỊ ẢNH */}
-          <img src={`https://7kwtyg-8080.csb.app/images/${photo.file_name}`} />
-
-          <Typography variant="caption" color="textSecondary">
-            Posted at: {new Date(photo.date_time).toLocaleString()}
+        <Box key={photo._id} sx={{ mb: 5, p: 2, border: "1px solid #eee" }}>
+          <img
+            src={`https://7kwtyg-8080.csb.app/images/${photo.file_name}`}
+            alt=""
+          />
+          <Typography variant="caption" display="block">
+            Posted: {new Date(photo.date_time).toLocaleString()}
           </Typography>
-
-          <Divider sx={{ marginY: 2 }} />
-
-          {/* ============================================================
-              NEW: Hiển thị danh sách bình luận hiện có
-              ============================================================ */}
+          <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-            Comments: ({photo.comments.length})
+            Comments:
           </Typography>
-          {photo.comments && photo.comments.length > 0 ? (
-            photo.comments.map((c) => (
-              <Box
-                key={c._id}
-                sx={{ marginBottom: "10px", paddingLeft: "15px" }}
-              >
-                <Typography variant="body2">
-                  <Link
-                    to={`/users/${c.user_id._id}`}
-                    style={{ fontWeight: "bold", textDecoration: "none" }}
-                  >
-                    {c.user_id.first_name} {c.user_id.last_name}
-                  </Link>
-                  : {c.comment}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {new Date(c.date_time).toLocaleString()}
-                </Typography>
-              </Box>
-            ))
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{ fontStyle: "italic", color: "gray" }}
-            >
-              No comments yet.
-            </Typography>
-          )}
 
-          {/* ============================================================
-              NEW: Problem 2 - Form nhập bình luận mới
-              ============================================================ */}
-          <Box sx={{ display: "flex", marginTop: "15px", gap: 1 }}>
+          {photo.comments?.map((c) => (
+            <Box
+              key={c._id}
+              sx={{ mb: 1, pl: 2, borderLeft: "2px solid #f0f0f0" }}
+            >
+              {editingId === c._id ? (
+                <Box>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                  />
+                  <Button onClick={() => handleUpdate(c._id)}>Save</Button>
+                  <Button onClick={() => setEditingId(null)}>Cancel</Button>
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography variant="body2">
+                    <Link to={`/users/${c.user_id._id}`}>
+                      <b>
+                        {c.user_id.first_name} {c.user_id.last_name}
+                      </b>
+                    </Link>
+                    : {c.comment}
+                  </Typography>
+                  {currentUser?._id === c.user_id._id && (
+                    <Box>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setEditingId(c._id);
+                          setEditText(c.comment);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(c._id)}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          ))}
+
+          <Box sx={{ display: "flex", mt: 2, gap: 1 }}>
             <TextField
               fullWidth
               size="small"
-              label="Add a comment..."
-              variant="outlined"
+              label="Add comment..."
               value={commentText[photo._id] || ""}
               onChange={(e) =>
                 setCommentText({ ...commentText, [photo._id]: e.target.value })
@@ -145,14 +147,13 @@ function UserPhotos() {
             <Button
               variant="contained"
               onClick={() => handleAddComment(photo._id)}
-              sx={{ whiteSpace: "nowrap" }}
             >
               Post
             </Button>
           </Box>
         </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 
