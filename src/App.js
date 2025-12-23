@@ -15,6 +15,7 @@ import UserPhotos from "./components/UserPhotos";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginRegister from "./components/LoginRegister";
 import UserCommentLink from "./components/UserCommentLink";
+import EditProfile from "./components/EditProfile";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -64,6 +65,7 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/comments/:userId"
                 element={
@@ -73,6 +75,20 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/edit-profile"
+                element={
+                  <ProtectedRoute currentUser={currentUser}>
+                    {/* SỬA: Truyền currentUser vào đây */}
+                    <EditProfile
+                      currentUser={currentUser}
+                      onUpdateSuccess={(user) => setCurrentUser(user)}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="*"
                 element={

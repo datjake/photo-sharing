@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
-import { useMatch, useNavigate } from "react-router-dom";
+import { useMatch, useNavigate, Link } from "react-router-dom";
 
 import fetchModel from "../../lib/fetchModelData";
 
@@ -21,7 +21,10 @@ function TopBar({ currentUser, onLogout }) {
     null;
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setUser(null);
+      return;
+    }
 
     fetchModel(`https://7kwtyg-8080.csb.app/api/user/${userId}`, {
       credentials: "include",
@@ -63,14 +66,10 @@ function TopBar({ currentUser, onLogout }) {
     }
   };
 
-  /* ============================================================
-     NEW: Problem 3 - Xử lý Photo Uploading
-     ============================================================ */
   const handlePhotoUpload = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
 
-    // Tạo đối tượng FormData để gửi file nhị phân
     const domForm = new FormData();
     domForm.append("photo", selectedFile);
 
@@ -80,7 +79,7 @@ function TopBar({ currentUser, onLogout }) {
         {
           method: "POST",
           body: domForm,
-          credentials: "include", // Cần thiết để Server lấy user_id từ session
+          credentials: "include",
         }
       );
 
@@ -100,7 +99,12 @@ function TopBar({ currentUser, onLogout }) {
   return (
     <AppBar className="topbar-appBar" position="absolute">
       <Toolbar>
-        <Typography variant="h5" color="inherit">
+        <Typography
+          variant="h5"
+          color="inherit"
+          sx={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        >
           Final Project
         </Typography>
 
@@ -114,9 +118,18 @@ function TopBar({ currentUser, onLogout }) {
 
         {currentUser ? (
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* ============================================================
-                NEW: Nút Add Photo (Sử dụng thẻ input ẩn để chọn file)
-                ============================================================ */}
+            {/* Nút Sửa Hồ Sơ mới thêm */}
+            <Button
+              variant="outlined"
+              color="inherit"
+              component={Link}
+              to="/edit-profile"
+              sx={{ marginRight: 2, borderColor: "rgba(255,255,255,0.5)" }}
+            >
+              Edit Profile
+            </Button>
+
+            {/* Nút Add Photo */}
             <Button
               variant="contained"
               color="success"
@@ -132,15 +145,23 @@ function TopBar({ currentUser, onLogout }) {
               />
             </Button>
 
-            <Typography sx={{ marginRight: 2 }}>
+            <Typography sx={{ marginRight: 2, fontWeight: "bold" }}>
               Hi {currentUser.first_name}
             </Typography>
-            <Button color="inherit" onClick={handleLogout}>
+
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           </Box>
         ) : (
-          <Typography>Please Login</Typography>
+          <Button color="inherit" component={Link} to="/login">
+            Login
+          </Button>
         )}
       </Toolbar>
     </AppBar>
