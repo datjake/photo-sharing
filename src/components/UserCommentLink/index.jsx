@@ -54,7 +54,7 @@ function UserCommentLinks({ currentUser }) {
       <Typography variant="h5">Your Comments</Typography>
       {comments.map((c) => (
         <Box key={c.comment_id} sx={{ border: "1px solid #ddd", p: 2, mt: 2 }}>
-          <Link to={`/photos/${userId}`}>
+          <Link to={`/photos/${c.photo_owner_id}`}>
             <img
               src={`https://7kwtyg-8080.csb.app/images/${c.file_name}`}
               width={100}
